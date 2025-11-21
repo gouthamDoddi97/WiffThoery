@@ -722,7 +722,7 @@ img {
 }
 
 .about__mood-card--primary {
-  background: linear-gradient(135deg, rgba(212, 184, 119, 0.22), rgba(21, 21, 32, 0.6));
+  background: linear-gradient(135deg, var(--color-primary-soft), var(--color-surface));
   color: var(--color-heading);
 }
 
@@ -732,8 +732,8 @@ img {
 }
 
 .about__mood-card--accent {
-  background: rgba(90, 106, 184, 0.18);
-  color: rgba(186, 198, 255, 0.85);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
 }
 
 .feature-grid {
@@ -747,7 +747,7 @@ img {
   padding: 1.8rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  background: rgba(15, 15, 24, 0.8);
+  background: var(--color-surface);
   backdrop-filter: blur(12px);
   min-height: 220px;
 }
