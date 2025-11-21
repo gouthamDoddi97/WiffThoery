@@ -469,10 +469,10 @@ img {
   position: relative;
   padding: 2.6rem 1.8rem 2.1rem;
   border-radius: var(--radius-md);
-  background: linear-gradient(200deg, rgba(255, 255, 255, 0.05), var(--accent, rgba(18, 18, 27, 0.85)));
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(200deg, var(--color-surface-alt), var(--accent, var(--color-surface)));
+  border: 1px solid var(--color-border);
   backdrop-filter: blur(22px);
-  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.38);
+  box-shadow: 0 30px 50px var(--shadow-strong);
   overflow: hidden;
   transition: transform var(--transition), border var(--transition), box-shadow var(--transition);
 }
@@ -482,14 +482,14 @@ img {
   position: absolute;
   inset: 1px;
   border-radius: calc(var(--radius-md) - 3px);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 65%);
+  background: linear-gradient(180deg, var(--color-surface-alt), transparent 65%);
   pointer-events: none;
 }
 
 .hero__tile:hover {
   transform: translateY(-10px);
-  border-color: rgba(212, 184, 119, 0.28);
-  box-shadow: 0 34px 60px rgba(0, 0, 0, 0.42);
+  border-color: var(--color-primary-soft);
+  box-shadow: 0 34px 60px var(--shadow-strong);
 }
 
 .hero__tile-media {
@@ -505,7 +505,7 @@ img {
   width: 100%;
   max-width: clamp(140px, 22vw, 220px);
   object-fit: contain;
-  filter: drop-shadow(0 22px 38px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 22px 38px var(--shadow-strong));
 }
 
 .hero__tile-info {
@@ -981,7 +981,7 @@ img {
   display: flex;
   gap: 0.9rem;
   align-items: center;
-  background: rgba(14, 14, 22, 0.75);
+  background: var(--color-surface);
   padding: 1rem 1.2rem;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
@@ -1018,7 +1018,7 @@ img {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  background: rgba(10, 10, 18, 0.85);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: clamp(32px, 5vw, 48px);
@@ -1045,8 +1045,8 @@ img {
 .contact__form select,
 .contact__form textarea {
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(6, 6, 12, 0.6);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-muted);
   padding: 0.85rem 1rem;
   color: var(--color-heading);
   font-size: 0.95rem;
