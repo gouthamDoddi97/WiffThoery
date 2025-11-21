@@ -128,7 +128,13 @@ const Navigation = ({ cartCount = 0, onClearCart, onCartClick, theme, toggleThem
                   key={item.name}
                   href={item.href}
                   className="site-nav__mobile-link"
-                  onClick={() => setIsOpen(false)}
+                  onClick={(e) => {
+                    if (item.name === 'Home') {
+                      scrollToTop(e);
+                    } else {
+                      setIsOpen(false);
+                    }
+                  }}
                   whileHover={{ x: 8 }}
                   whileTap={{ scale: 0.97 }}
                 >
