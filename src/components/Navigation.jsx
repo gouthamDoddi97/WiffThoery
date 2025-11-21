@@ -132,6 +132,10 @@ const Navigation = ({ cartCount = 0, onClearCart, onCartClick, theme, toggleThem
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
                 className="button button--light"
+                onClick={() => {
+                  setIsOpen(false);
+                  onCartClick();
+                }}
               >
                 <ShoppingBag className="icon" aria-hidden="true" />
                 View Cart
