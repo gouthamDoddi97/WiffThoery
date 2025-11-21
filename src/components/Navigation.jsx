@@ -132,7 +132,8 @@ const Navigation = ({ cartCount = 0, onClearCart, onCartClick, theme, toggleThem
                     if (item.name === 'Home') {
                       scrollToTop(e);
                     } else {
-                      setIsOpen(false);
+                      // Close menu after a short delay to allow scroll to initiate
+                      setTimeout(() => setIsOpen(false), 100);
                     }
                   }}
                   whileHover={{ x: 8 }}
