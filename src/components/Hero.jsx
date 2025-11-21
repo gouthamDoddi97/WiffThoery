@@ -3,27 +3,31 @@ import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ChevronDown } from 'lucide-react';
+import { getAssetPath } from '../utils/assetPath';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const heroShots = [
+const perfumes = [
   {
+    id: 1,
     name: 'Golden Dawn',
-    notes: 'Amber · Bergamot · Cedarwood',
-    accent: 'rgba(212, 184, 119, 0.22)',
-    image: '/images/golden-dawn.png',
+    notes: 'Bergamot · Amber · Cedarwood',
+    accent: 'rgba(212, 184, 119, 0.25)',
+    image: getAssetPath('images/golden-dawn.png'),
   },
   {
+    id: 2,
     name: 'Midnight Elegance',
     notes: 'Black Currant · Vanilla · Sandalwood',
-    accent: 'rgba(25, 25, 38, 0.78)',
-    image: '/images/midnight-elegance.png',
+    accent: 'rgba(84, 84, 123, 0.25)',
+    image: getAssetPath('images/midnight-elegance.png'),
   },
   {
+    id: 3,
     name: 'Rose Mystique',
-    notes: 'Damask Rose · Jasmine · White Musk',
-    accent: 'rgba(180, 120, 120, 0.26)',
-    image: '/images/rose-mystique.png',
+    notes: 'Rose · Jasmine · White Musk',
+    accent: 'rgba(184, 134, 150, 0.25)',
+    image: getAssetPath('images/rose-mystique.png'),
   },
 ];
 
@@ -78,19 +82,19 @@ const Hero = () => {
 
     const parallax = tileArray.length
       ? ScrollTrigger.create({
-          trigger: hero,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-          onUpdate: (self) => {
-            tileArray.forEach((tile, index) => {
-              gsap.set(tile, {
-                y: self.progress * (index % 2 === 0 ? 30 : 60),
-                rotate: self.progress * (index % 2 === 0 ? -3 : 4),
-              });
+        trigger: hero,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+        onUpdate: (self) => {
+          tileArray.forEach((tile, index) => {
+            gsap.set(tile, {
+              y: self.progress * (index % 2 === 0 ? 30 : 60),
+              rotate: self.progress * (index % 2 === 0 ? -3 : 4),
             });
-          },
-        })
+          });
+        },
+      })
       : null;
 
     return () => {

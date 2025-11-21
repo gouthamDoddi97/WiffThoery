@@ -4,6 +4,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Star } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { getAssetPath } from '../utils/assetPath';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,7 +15,7 @@ const products = [
     price: '$150',
     description: 'Black currant velvet paired with Madagascan vanilla and smokey sandalwood.',
     rating: 4.8,
-    image: '/images/midnight-elegance.png',
+    image: getAssetPath('images/midnight-elegance.png'),
     category: 'Nocturne',
     notes: ['Black Currant', 'Vanilla', 'Sandalwood'],
   },
@@ -24,7 +25,7 @@ const products = [
     price: '$180',
     description: 'A luminous accord of bergamot, sun-warmed amber and polished cedarwood.',
     rating: 4.9,
-    image: '/images/golden-dawn.png',
+    image: getAssetPath('images/golden-dawn.png'),
     category: 'Signature',
     notes: ['Bergamot', 'Amber', 'Cedarwood'],
   },
@@ -34,7 +35,7 @@ const products = [
     price: '$200',
     description: 'Damask rose immersed in jasmine absolute and whisper-soft white musk.',
     rating: 4.7,
-    image: '/images/rose-mystique.png',
+    image: getAssetPath('images/rose-mystique.png'),
     category: 'Atelier',
     notes: ['Rose', 'Jasmine', 'White Musk'],
   },
@@ -44,7 +45,7 @@ const products = [
     price: '$160',
     description: 'Sea salt, mineral breeze and driftwood for an invigorating coastal trail.',
     rating: 4.6,
-    image: '/images/ocean-breeze.png',
+    image: getAssetPath('images/ocean-breeze.png'),
     category: 'Voyage',
     notes: ['Sea Salt', 'Aquatic Accord', 'Driftwood'],
   },
@@ -54,7 +55,7 @@ const products = [
     price: '$170',
     description: 'Slow-steeped vanilla bean layered with caramel praline and blush peony.',
     rating: 4.8,
-    image: '/images/vanilla-dreams.png',
+    image: getAssetPath('images/vanilla-dreams.png'),
     category: 'Gourmand',
     notes: ['Vanilla', 'Caramel', 'Peony'],
   },
@@ -64,7 +65,7 @@ const products = [
     price: '$220',
     description: 'A rich tapestry of cured tobacco, spiced leather and black peppercorn.',
     rating: 4.5,
-    image: '/images/smoky-noir.png',
+    image: getAssetPath('images/smoky-noir.png'),
     category: 'Private Blend',
     notes: ['Leather', 'Tobacco', 'Black Pepper'],
   },
