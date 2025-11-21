@@ -1,0 +1,266 @@
+.cart-animation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: flex-end;
+    /* Align to bottom */
+    justify-content: center;
+    padding-bottom: 50px;
+    /* Add some spacing from bottom */
+    z-index: 9999;
+}
+
+.box-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+/* Box Bottom */
+.box-bottom {
+    position: absolute;
+    width: 200px;
+    height: 100px;
+    transform-style: preserve-3d;
+    bottom: 0;
+}
+
+.box-face {
+    position: absolute;
+    background: linear-gradient(135deg, #8b6f47 0%, #6b5638 100%);
+    border: 2px solid #5a4a2f;
+}
+
+.box-front {
+    width: 200px;
+    height: 100px;
+    transform: translateZ(100px);
+}
+
+.box-back {
+    width: 200px;
+    height: 100px;
+    transform: translateZ(-100px) rotateY(180deg);
+}
+
+.box-left {
+    width: 200px;
+    height: 100px;
+    transform: translateX(-100px) rotateY(-90deg);
+}
+
+.box-right {
+    width: 200px;
+    height: 100px;
+    transform: translateX(100px) rotateY(90deg);
+}
+
+.box-bottom-face {
+    width: 200px;
+    height: 200px;
+    transform: translateY(100px) rotateX(-90deg);
+    background: linear-gradient(135deg, #6b5638 0%, #5a4a2f 100%);
+}
+
+/* Box Lid */
+.box-lid {
+    position: absolute;
+    width: 200px;
+    height: 20px;
+    transform-style: preserve-3d;
+    top: 0;
+    transform-origin: top;
+}
+
+.box-lid-top {
+    width: 200px;
+    height: 200px;
+    transform: translateZ(10px);
+    background: linear-gradient(135deg, #a08060 0%, #8b6f47 100%);
+}
+
+.box-lid-front {
+    width: 200px;
+    height: 20px;
+    transform: translateZ(100px);
+}
+
+.box-lid-back {
+    width: 200px;
+    height: 20px;
+    transform: translateZ(-100px) rotateY(180deg);
+}
+
+.box-lid-left {
+    width: 200px;
+    height: 20px;
+    transform: translateX(-100px) rotateY(-90deg);
+}
+
+.box-lid-right {
+    width: 200px;
+    height: 20px;
+    transform: translateX(100px) rotateY(90deg);
+}
+
+/* Falling Bottle */
+.falling-bottle {
+    position: absolute;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.falling-bottle img {
+    width: 220px;
+    height: 300px;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+}
+
+.falling-bottle-fixed {
+    position: fixed;
+    object-fit: contain;
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5));
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Existing Bottles in Box */
+.existing-bottles-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    pointer-events: none;
+}
+
+.existing-bottle {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    width: 60px;
+    height: 80px;
+    margin-left: -30px;
+    transform-style: preserve-3d;
+    transform-origin: bottom center;
+}
+
+.existing-bottle img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3));
+}
+
+/* Success Notification */
+.success-notification {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+    padding: 2rem 3rem;
+    border-radius: 20px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 20px 60px rgba(34, 197, 94, 0.4);
+    z-index: 100;
+}
+
+.success-icon {
+    width: 60px;
+    height: 60px;
+    background: white;
+    color: #22c55e;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0 auto 1rem;
+}
+
+.success-notification h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.success-notification p {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+/* Confetti */
+.confetti-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+/* Party Poppers */
+.popper {
+    position: absolute;
+    font-size: 4rem;
+    z-index: 101;
+}
+
+.popper-left {
+    left: 20%;
+    top: 30%;
+}
+
+.popper-right {
+    right: 20%;
+    top: 30%;
+}
+
+/* Add tape effect to box */
+.box-front::before,
+.box-back::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: rgba(210, 180, 140, 0.6);
+    transform: translateY(-50%);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+/* Add shine effect to box */
+.box-face::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
