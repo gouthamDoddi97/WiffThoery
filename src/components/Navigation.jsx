@@ -129,17 +129,12 @@ const Navigation = ({ cartCount = 0, onClearCart, onCartClick, theme, toggleThem
                   href={item.href}
                   className="site-nav__mobile-link"
                   onClick={(e) => {
-                    e.preventDefault();
                     if (item.name === 'Home') {
+                      e.preventDefault();
                       window.scrollTo({ top: 0, behavior: 'smooth' });
-                    } else {
-                      const targetId = item.href.replace('#', '');
-                      const targetElement = document.getElementById(targetId);
-                      if (targetElement) {
-                        targetElement.scrollIntoView({ behavior: 'smooth' });
-                      }
                     }
-                    setTimeout(() => setIsOpen(false), 300);
+                    // Close menu after navigation
+                    setTimeout(() => setIsOpen(false), 100);
                   }}
                   whileHover={{ x: 8 }}
                   whileTap={{ scale: 0.97 }}
