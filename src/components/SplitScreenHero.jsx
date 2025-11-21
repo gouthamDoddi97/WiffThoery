@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AddToCartAnimation from './AddToCartAnimation';
+import { getAssetPath } from '../utils/assetPath';
 import './SplitScreenHero.css';
 
 const perfumes = [
@@ -9,8 +10,8 @@ const perfumes = [
     name: 'GIT',
     notes: 'Fresh · Citrus · Woody',
     color: '#2a5f4d',
-    image: '/images/GIT_bottle.png',
-    background: '/images/GIT-bg.png',
+    image: getAssetPath('images/GIT_bottle.png'),
+    background: getAssetPath('images/GIT-bg.png'),
     price: '$299'
   },
   {
@@ -18,8 +19,8 @@ const perfumes = [
     name: 'Ganymede',
     notes: 'Mineral · Suede · Mandarin',
     color: '#4a5568',
-    image: '/images/Ganymede_bottle.png',
-    background: '/images/Ganymede-bg.png',
+    image: getAssetPath('images/Ganymede_bottle.png'),
+    background: getAssetPath('images/Ganymede-bg.png'),
     price: '$349'
   },
   {
@@ -27,8 +28,8 @@ const perfumes = [
     name: 'Guidance',
     notes: 'Floral · Amber · Musk',
     color: '#8b5a3c',
-    image: '/images/Guidance_bottle.png',
-    background: '/images/Guidance-bg.png',
+    image: getAssetPath('images/Guidance_bottle.png'),
+    background: getAssetPath('images/Guidance-bg.png'),
     price: '$329'
   }
 ];
