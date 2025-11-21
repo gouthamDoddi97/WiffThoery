@@ -32,6 +32,12 @@ const Navigation = ({ cartCount = 0, onClearCart, onCartClick, theme, toggleThem
     };
   }, [isOpen]);
 
+  const scrollToTop = (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsOpen(false);
+  };
+
   return (
     <motion.nav
       className={cn('site-nav', scrolled && 'site-nav--scrolled')}
@@ -40,7 +46,7 @@ const Navigation = ({ cartCount = 0, onClearCart, onCartClick, theme, toggleThem
       transition={{ duration: 0.5, ease: 'easeOut' }}
     >
       <div className="container site-nav__inner">
-        <a href="#home" className="site-nav__brand" aria-label="Whiff Theory home">
+        <a href="#home" className="site-nav__brand" aria-label="Whiff Theory home" onClick={scrollToTop}>
           Whiff Theory
         </a>
 
@@ -53,6 +59,7 @@ const Navigation = ({ cartCount = 0, onClearCart, onCartClick, theme, toggleThem
               role="menuitem"
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.96 }}
+              onClick={item.name === 'Home' ? scrollToTop : undefined}
             >
               {item.name}
             </motion.a>
