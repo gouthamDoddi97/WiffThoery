@@ -128,7 +128,12 @@ const Navigation = ({ cartCount = 0, onClearCart, onCartClick, theme, toggleThem
                   key={item.name}
                   href={item.href}
                   className="site-nav__mobile-link"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    // Restore body overflow immediately to allow scrolling
+                    document.body.style.overflow = '';
+                    // Close menu after a short delay
+                    setTimeout(() => setIsOpen(false), 100);
+                  }}
                   whileHover={{ x: 8 }}
                   whileTap={{ scale: 0.97 }}
                 >
