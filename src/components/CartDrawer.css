@@ -1,7 +1,7 @@
 .cart-drawer-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--color-overlay);
     backdrop-filter: blur(4px);
     z-index: 100;
     display: flex;
@@ -12,12 +12,12 @@
     width: 100%;
     max-width: 450px;
     height: 100%;
-    background: rgba(10, 10, 16, 0.95);
+    background: var(--color-bg-soft);
     backdrop-filter: blur(20px);
     border-left: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
-    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+    box-shadow: -10px 0 40px var(--shadow-strong);
 }
 
 .cart-drawer__header {
@@ -58,7 +58,7 @@
 }
 
 .cart-drawer__close:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-surface-alt);
     color: var(--color-heading);
 }
 
@@ -86,7 +86,7 @@
     display: flex;
     gap: 1rem;
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--color-surface-alt);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     transition: border-color 0.2s ease;
@@ -100,7 +100,7 @@
     width: 80px;
     height: 80px;
     object-fit: contain;
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1), transparent 70%);
+    background: var(--gradient-overlay);
     border-radius: var(--radius-sm);
     padding: 0.5rem;
 }
@@ -141,7 +141,7 @@
 .cart-drawer__footer {
     padding: 2rem;
     border-top: 1px solid var(--color-border);
-    background: rgba(5, 5, 9, 0.5);
+    background: var(--color-bg-muted);
 }
 
 .cart-drawer__total {
