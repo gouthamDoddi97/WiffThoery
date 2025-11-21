@@ -1446,6 +1446,20 @@ img {
     right: 20px;
     bottom: 28px;
   }
+
+  /* Mobile Navigation */
+  .site-nav__links {
+    display: none;
+  }
+
+  .site-nav__toggle {
+    display: block;
+    cursor: pointer;
+  }
+
+  .site-nav__mobile {
+    display: block;
+  }
 }
 
 @media (max-width: 480px) {
