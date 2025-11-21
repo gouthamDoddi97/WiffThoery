@@ -115,7 +115,7 @@ img {
 }
 
 .section--muted {
-  background: linear-gradient(140deg, rgba(10, 10, 16, 0.9), rgba(18, 18, 28, 0.85));
+  background: var(--color-bg-muted);
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
 }
@@ -560,7 +560,7 @@ img {
 
 /* Collection */
 .collection {
-  background: linear-gradient(180deg, rgba(6, 6, 12, 0.95), rgba(11, 11, 18, 0.9));
+  background: var(--gradient-surface);
 }
 
 .collection__grid {
