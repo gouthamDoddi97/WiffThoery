@@ -114,7 +114,7 @@ const SplitScreenHero = ({ addToCart, cart }) => {
   };
 
   return (
-    <div className="split-screen-hero">
+    <div className="split-screen-hero" id="home">
       {perfumes.map((perfume, index) => (
         <motion.div
           key={perfume.id}

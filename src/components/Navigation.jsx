@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ShoppingBag, Sun, Moon } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { scroller } from 'react-scroll';
 
 const navItems = [
   { name: 'Home', href: '#home' },
@@ -32,11 +33,40 @@ const Navigation = ({ cartCount = 0, onClearCart, onCartClick, theme, toggleThem
     };
   }, [isOpen]);
 
-  const scrollToTop = (e) => {
-    e.preventDefault();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setIsOpen(false);
+  // Unified navigation click handler using react-scroll
+  const handleNavClick = (href, isMobile = false) => {
+    // Close mobile menu if needed
+    if (isMobile) {
+      setIsOpen(false);
+      document.body.style.overflow = '';
+    }
+
+    const target = href.replace('#', '');
+
+    // Special case for Home: scroll to top
+    if (target === 'home') {
+      scroller.scrollTo('home', {
+        duration: 800,
+        delay: 0,
+        smooth: 'easeInOutQuart',
+        offset: -70, // Offset for fixed header
+      });
+    } else {
+      // Use react-scroll for other sections
+      scroller.scrollTo(target, {
+        duration: 800,
+        delay: 0,
+        smooth: 'easeInOutQuart',
+        offset: -70, // Offset for fixed header
+      });
+    }
+
+    // Update URL hash for consistency without causing jump
+    if (typeof history !== 'undefined') {
+      history.pushState(null, '', href);
+    }
   };
+
 
   return (
     <motion.nav
@@ -46,7 +76,7 @@ const Navigation = ({ cartCount = 0, onClearCart, onCartClick, theme, toggleThem
       transition={{ duration: 0.5, ease: 'easeOut' }}
     >
       <div className="container site-nav__inner">
-        <a href="#home" className="site-nav__brand" aria-label="Whiff Theory home" onClick={scrollToTop}>
+        <a href="#home" className="site-nav__brand" aria-label="Whiff Theory home" onClick={(e) => { e.preventDefault(); handleNavClick('#home'); }}>
           Whiff Theory
         </a>
 
@@ -59,7 +89,7 @@ const Navigation = ({ cartCount = 0, onClearCart, onCartClick, theme, toggleThem
               role="menuitem"
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.96 }}
-              onClick={item.name === 'Home' ? scrollToTop : undefined}
+              onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
             >
               {item.name}
             </motion.a>
@@ -128,12 +158,7 @@ const Navigation = ({ cartCount = 0, onClearCart, onCartClick, theme, toggleThem
                   key={item.name}
                   href={item.href}
                   className="site-nav__mobile-link"
-                  onClick={() => {
-                    // Restore body overflow immediately to allow scrolling
-                    document.body.style.overflow = '';
-                    // Close menu after a short delay
-                    setTimeout(() => setIsOpen(false), 100);
-                  }}
+                  onClick={(e) => { e.preventDefault(); handleNavClick(item.href, true); }}
                   whileHover={{ x: 8 }}
                   whileTap={{ scale: 0.97 }}
                 >
@@ -151,6 +176,17 @@ const Navigation = ({ cartCount = 0, onClearCart, onCartClick, theme, toggleThem
               >
                 <ShoppingBag className="icon" aria-hidden="true" />
                 View Cart
+              </motion.button>
+              {/* Theme toggle button for mobile */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.96 }}
+                className="button button--ghost site-nav__theme-toggle"
+                onClick={toggleTheme}
+                aria-label="Toggle theme"
+                style={{ marginLeft: '0.5rem', padding: '0.5rem' }}
+              >
+                {theme === 'dark' ? <Sun className="icon" /> : <Moon className="icon" />}
               </motion.button>
             </div>
           </motion.div>

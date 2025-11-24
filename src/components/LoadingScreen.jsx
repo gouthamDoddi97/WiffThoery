@@ -25,12 +25,12 @@ const LoadingScreen = ({ onLoadComplete }) => {
 
   const bottleVariants = {
     initial: { scale: 0.8, opacity: 0, rotateY: -180 },
-    animate: { 
-      scale: 1, 
-      opacity: 1, 
+    animate: {
+      scale: 1,
+      opacity: 1,
       rotateY: 0,
-      transition: { 
-        duration: 2, 
+      transition: {
+        duration: 2,
         ease: "backOut",
         rotateY: { duration: 1.5 }
       }
@@ -39,7 +39,7 @@ const LoadingScreen = ({ onLoadComplete }) => {
 
   const liquidVariants = {
     initial: { height: 0 },
-    animate: { 
+    animate: {
       height: `${progress}%`,
       transition: { duration: 0.3, ease: "easeOut" }
     }
@@ -73,7 +73,7 @@ const LoadingScreen = ({ onLoadComplete }) => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="loading__brand"
           >
-            <h1>Luxe Parfum</h1>
+            <h1>Whiff Theory</h1>
             <p>The Art of Fragrance</p>
           </motion.div>
 
@@ -92,9 +92,9 @@ const LoadingScreen = ({ onLoadComplete }) => {
                 className="loading__liquid"
               />
               <div className="loading__label">
-                <span>LUXE</span>
+                <span>Whiff</span>
                 <i />
-                <span>Parfum</span>
+                <span>Theory</span>
               </div>
               <motion.div
                 animate={{ x: [-100, 100] }}
