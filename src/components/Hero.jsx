@@ -29,6 +29,27 @@ const perfumes = [
     accent: 'rgba(184, 134, 150, 0.25)',
     image: getAssetPath('images/rose-mystique.png'),
   },
+  {
+    id: 4,
+    name: 'GIT',
+    notes: 'Bergamot · Leather · Oud',
+    accent: 'rgba(139, 115, 85, 0.25)',
+    image: getAssetPath('images/git.png'),
+  },
+  {
+    id: 5,
+    name: 'Ganamyde',
+    notes: 'Iris · Ambergris · Vetiver',
+    accent: 'rgba(138, 154, 145, 0.25)',
+    image: getAssetPath('images/ganamyde.png'),
+  },
+  {
+    id: 6,
+    name: 'Guidance',
+    notes: 'Saffron · Patchouli · Musk',
+    accent: 'rgba(165, 115, 95, 0.25)',
+    image: getAssetPath('images/guidance.png'),
+  },
 ];
 
 const Hero = () => {
