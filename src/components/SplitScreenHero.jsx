@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AddToCartAnimation from './AddToCartAnimation';
 import { getAssetPath } from '../utils/assetPath';
 import './SplitScreenHero.css';
+import formatINR from '../lib/formatCurrency';
 
 const perfumes = [
   {
@@ -12,7 +13,7 @@ const perfumes = [
     color: '#2a5f4d',
     image: getAssetPath('images/GIT_bottle.png'),
     background: getAssetPath('images/GIT-bg.png'),
-    price: '$299'
+  price: 299
   },
   {
     id: 2,
@@ -21,7 +22,7 @@ const perfumes = [
     color: '#4a5568',
     image: getAssetPath('images/Ganymede_bottle.png'),
     background: getAssetPath('images/Ganymede-bg.png'),
-    price: '$349'
+  price: 349
   },
   {
     id: 3,
@@ -30,7 +31,7 @@ const perfumes = [
     color: '#8b5a3c',
     image: getAssetPath('images/Guidance_bottle.png'),
     background: getAssetPath('images/Guidance-bg.png'),
-    price: '$329'
+  price: 329
   }
 ];
 
@@ -170,7 +171,7 @@ const SplitScreenHero = ({ addToCart, cart }) => {
             >
               <h2 className="perfume-name">{perfume.name}</h2>
               <p className="perfume-notes">{perfume.notes}</p>
-              <p className="perfume-price">{perfume.price}</p>
+              <p className="perfume-price">{formatINR(perfume.price)}</p>
 
               <motion.div
                 className="perfume-actions"

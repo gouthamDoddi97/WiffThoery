@@ -20,9 +20,11 @@ import {
   ZoomIn,
   StickyNote,
   ListTodo,
+  Calculator,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import ImageUpload from '../components/ImageUpload';
+import formatINR from '../lib/formatCurrency';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -152,6 +154,14 @@ const AdminDashboard = () => {
                   <ListTodo size={18} />
                   <span className="button-text">To-Do</span>
                 </button>
+                <button
+                  onClick={() => navigate('/admin/calculator')}
+                  className="button button--secondary"
+                  title="Cost Calculator"
+                >
+                  <Calculator size={18} />
+                  <span className="button-text">Calculator</span>
+                </button>
               </div>
               <div className="user-info">
                 <User size={20} />
@@ -172,20 +182,20 @@ const AdminDashboard = () => {
           <StatsCard
             icon={<DollarSign />}
             title="Total Expenses"
-            value={`$${totalExpenses.toFixed(2)}`}
+            value={formatINR(totalExpenses)}
             color="#667eea"
           />
           <StatsCard
             icon={<TrendingUp />}
             title="This Month"
-            value={`$${filteredExpenses
+            value={formatINR(filteredExpenses
               .filter((exp) => {
                 const date = new Date(exp.expense_date);
                 const now = new Date();
                 return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
               })
               .reduce((sum, exp) => sum + parseFloat(exp.amount), 0)
-              .toFixed(2)}`}
+            )}
             color="#f093fb"
           />
           <StatsCard
@@ -217,7 +227,7 @@ const AdminDashboard = () => {
                   <div key={cat.category} className="chart-bar">
                     <div className="chart-bar__label">
                       <span className="chart-bar__name">{cat.category}</span>
-                      <span className="chart-bar__value">${cat.total.toFixed(2)}</span>
+                      <span className="chart-bar__value">{formatINR(cat.total)}</span>
                     </div>
                     <div className="chart-bar__track">
                       <motion.div
@@ -246,7 +256,7 @@ const AdminDashboard = () => {
                   <div key={user.user} className="chart-bar">
                     <div className="chart-bar__label">
                       <span className="chart-bar__name">{user.user}</span>
-                      <span className="chart-bar__value">${user.total.toFixed(2)}</span>
+                      <span className="chart-bar__value">{formatINR(user.total)}</span>
                     </div>
                     <div className="chart-bar__track">
                       <motion.div
@@ -435,7 +445,7 @@ const ExpensesTable = ({ expenses, onEdit, onView, onRefresh }) => {
                 <span className="category-badge">{expense.category}</span>
               </td>
               <td>{expense.description}</td>
-              <td className="amount">${parseFloat(expense.amount).toFixed(2)}</td>
+              <td className="amount">{formatINR(expense.amount)}</td>
               <td>
                 <div className="expense-images">
                   {expense.receipt_images && expense.receipt_images.length > 0 && (
@@ -543,8 +553,8 @@ const ExpenseDetailModal = ({ expense, onClose, onEdit }) => {
             <div className="detail-item">
               <label className="detail-label">Amount</label>
               <p className="detail-value detail-value--amount">
-                ${parseFloat(expense.amount).toFixed(2)}
-              </p>
+                  {formatINR(expense.amount)}
+                </p>
             </div>
 
             <div className="detail-item">
@@ -705,7 +715,7 @@ const ExpenseModal = ({ expense, categories, onClose, onSave }) => {
             <div className="form-group">
               <label className="form-label">
                 <DollarSign size={16} />
-                Amount ($)
+                Amount (₹)
               </label>
               <input
                 type="number"

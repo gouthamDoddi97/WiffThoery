@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, Package, TrendingDown } from 'lucide-react';
 import { getLowStockProducts } from '../lib/supabase';
+import formatINR from '../lib/formatCurrency';
 
 const LowStockAlerts = () => {
   const [lowStockItems, setLowStockItems] = useState([]);
@@ -111,7 +112,7 @@ const LowStockAlerts = () => {
                 {item.name}
               </h4>
               <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
-                ${parseFloat(item.price).toFixed(2)}
+                {formatINR(item.price)}
               </p>
             </div>
             

@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Light theme (default - day time) */
 :root {
   --color-bg: #fdf6e3;
   --color-bg-soft: #ffffff;
@@ -28,7 +29,8 @@
   --shadow-strong: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
-[data-theme="light"] {
+/* Dark theme (evening/night - 6 PM to 6 AM IST) */
+[data-theme="dark"] {
   --color-bg: #050509;
   --color-bg-soft: #0b0b13;
   --color-bg-muted: rgba(19, 19, 31, 0.85);

@@ -1,18 +1,21 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './lib/auth';
+import { ThemeProvider } from './context/ThemeContext';
 import App from './App';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import NotesPage from './pages/NotesPage';
 import TodoPage from './pages/TodoPage';
+import PerfumeCostCalculator from './pages/PerfumeCostCalculator';
 import ProtectedRoute from './components/ProtectedRoute';
 import './styles/admin.css';
 
 const AppRoutes = () => {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<App />} />
@@ -43,6 +46,14 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/admin/calculator"
+            element={
+              <ProtectedRoute>
+                <PerfumeCostCalculator />
+              </ProtectedRoute>
+            }
+          />
           
           {/* Redirect /admin to /admin/dashboard */}
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
@@ -52,6 +63,7 @@ const AppRoutes = () => {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+    </ThemeProvider>
   );
 };
 

@@ -6,6 +6,7 @@ import { Star } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { getAssetPath } from '../utils/assetPath';
 import { getProducts } from '../lib/supabase';
+import formatINR from '../lib/formatCurrency';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -148,9 +149,7 @@ const ProductCollection = () => {
     return () => trigger.kill();
   }, [products]);
 
-  const formatPrice = (price) => {
-    return `$${parseFloat(price).toFixed(2)}`;
-  };
+  const formatPrice = (price) => formatINR(price);
 
   const getClassificationLabel = (classification) => {
     const labels = {
