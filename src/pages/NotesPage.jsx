@@ -89,6 +89,16 @@ const NotesPage = () => {
     }
   };
 
+  const updateNoteInState = (noteId, updater) => {
+    setNotes((prevNotes) =>
+      prevNotes.map((note) => (note.id === noteId ? updater(note) : note))
+    );
+  };
+
+  const removeNoteFromState = (noteId) => {
+    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
+  };
+
   return (
     <div className="admin-dashboard">
       <header className="dashboard-header">
@@ -138,7 +148,8 @@ const NotesPage = () => {
                   key={note.id}
                   note={note}
                   onEdit={setEditingNote}
-                  onRefresh={fetchNotes}
+                  onUpdate={updateNoteInState}
+                  onRemove={removeNoteFromState}
                 />
               ))
             )}
@@ -166,8 +177,8 @@ const NotesPage = () => {
   );
 };
 
-const NoteCard = ({ note, onEdit, onRefresh }) => {
-  const { user, profile } = useAuth();
+const NoteCard = ({ note, onEdit, onUpdate, onRemove }) => {
+  const { user } = useAuth();
   const [showComments, setShowComments] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [newComment, setNewComment] = useState('');
@@ -195,21 +206,41 @@ const NoteCard = ({ note, onEdit, onRefresh }) => {
       if (myVote?.status === status) {
         // Remove vote
         await supabase.from('note_status_votes').delete().eq('id', myVote.id);
+        onUpdate(note.id, (current) => ({
+          ...current,
+          votes: current.votes.filter((v) => v.id !== myVote.id),
+        }));
       } else if (myVote) {
         // Update vote
         await supabase
           .from('note_status_votes')
           .update({ status })
           .eq('id', myVote.id);
+        onUpdate(note.id, (current) => ({
+          ...current,
+          votes: current.votes.map((v) =>
+            v.id === myVote.id ? { ...v, status } : v
+          ),
+        }));
       } else {
         // Create vote
-        await supabase.from('note_status_votes').insert({
+        const { data: insertedVote, error: insertError } = await supabase
+          .from('note_status_votes')
+          .insert({
           note_id: note.id,
           user_id: user.id,
           status,
-        });
+          })
+          .select('*, user_profiles(full_name)')
+          .single();
+
+        if (insertError) throw insertError;
+
+        onUpdate(note.id, (current) => ({
+          ...current,
+          votes: [...current.votes, insertedVote],
+        }));
       }
-      onRefresh();
     } catch (error) {
       console.error('Error voting:', error);
       alert('Failed to update vote');
@@ -222,13 +253,23 @@ const NoteCard = ({ note, onEdit, onRefresh }) => {
 
     setSubmittingComment(true);
     try {
-      await supabase.from('note_comments').insert({
+      const { data: insertedComment, error: insertError } = await supabase
+        .from('note_comments')
+        .insert({
         note_id: note.id,
         user_id: user.id,
         comment: newComment.trim(),
-      });
+        })
+        .select('*, user_profiles(full_name)')
+        .single();
+
+      if (insertError) throw insertError;
+
       setNewComment('');
-      onRefresh();
+      onUpdate(note.id, (current) => ({
+        ...current,
+        comments: [...current.comments, insertedComment],
+      }));
     } catch (error) {
       console.error('Error adding comment:', error);
       alert('Failed to add comment');
@@ -241,7 +282,10 @@ const NoteCard = ({ note, onEdit, onRefresh }) => {
     if (!confirm('Delete this comment?')) return;
     try {
       await supabase.from('note_comments').delete().eq('id', commentId);
-      onRefresh();
+      onUpdate(note.id, (current) => ({
+        ...current,
+        comments: current.comments.filter((c) => c.id !== commentId),
+      }));
     } catch (error) {
       console.error('Error deleting comment:', error);
     }
@@ -257,17 +301,31 @@ const NoteCard = ({ note, onEdit, onRefresh }) => {
       if (existingReaction) {
         // Remove reaction
         await supabase.from('note_reactions').delete().eq('id', existingReaction.id);
+        onUpdate(note.id, (current) => ({
+          ...current,
+          reactions: current.reactions.filter((r) => r.id !== existingReaction.id),
+        }));
       } else {
         // Add reaction
-        await supabase.from('note_reactions').insert({
+        const { data: insertedReaction, error: insertError } = await supabase
+          .from('note_reactions')
+          .insert({
           note_id: note.id,
           user_id: user.id,
           emoji,
-        });
+          })
+          .select('*, user_profiles(full_name)')
+          .single();
+
+        if (insertError) throw insertError;
+
+        onUpdate(note.id, (current) => ({
+          ...current,
+          reactions: [...current.reactions, insertedReaction],
+        }));
       }
       
       setShowReactionPicker(false);
-      onRefresh();
     } catch (error) {
       console.error('Error handling reaction:', error);
       alert('Failed to update reaction');
@@ -300,7 +358,7 @@ const NoteCard = ({ note, onEdit, onRefresh }) => {
     try {
       const { error } = await supabase.from('notes').delete().eq('id', note.id);
       if (error) throw error;
-      onRefresh();
+      onRemove(note.id);
     } catch (error) {
       console.error('Error deleting note:', error);
       alert('Failed to delete note');

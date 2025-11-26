@@ -105,6 +105,16 @@ const TodoPage = () => {
     completed: todos.filter((t) => t.completed).length,
   };
 
+  const updateTodoInState = (todoId, updater) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) => (todo.id === todoId ? updater(todo) : todo))
+    );
+  };
+
+  const removeTodoFromState = (todoId) => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== todoId));
+  };
+
   return (
     <div className="admin-dashboard">
       <header className="dashboard-header">
@@ -197,7 +207,8 @@ const TodoPage = () => {
                   key={todo.id}
                   todo={todo}
                   onEdit={setEditingTodo}
-                  onRefresh={fetchTodos}
+                  onUpdate={updateTodoInState}
+                  onRemove={removeTodoFromState}
                 />
               ))
             )}
@@ -225,8 +236,8 @@ const TodoPage = () => {
   );
 };
 
-const TodoItem = ({ todo, onEdit, onRefresh }) => {
-  const { user, profile } = useAuth();
+const TodoItem = ({ todo, onEdit, onUpdate, onRemove }) => {
+  const { user } = useAuth();
   const [showComments, setShowComments] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [newComment, setNewComment] = useState('');
@@ -254,21 +265,41 @@ const TodoItem = ({ todo, onEdit, onRefresh }) => {
       if (myVote?.status === status) {
         // Remove vote
         await supabase.from('todo_status_votes').delete().eq('id', myVote.id);
+        onUpdate(todo.id, (current) => ({
+          ...current,
+          votes: current.votes.filter((v) => v.id !== myVote.id),
+        }));
       } else if (myVote) {
         // Update vote
         await supabase
           .from('todo_status_votes')
           .update({ status })
           .eq('id', myVote.id);
+        onUpdate(todo.id, (current) => ({
+          ...current,
+          votes: current.votes.map((v) =>
+            v.id === myVote.id ? { ...v, status } : v
+          ),
+        }));
       } else {
         // Create vote
-        await supabase.from('todo_status_votes').insert({
+        const { data: insertedVote, error: insertError } = await supabase
+          .from('todo_status_votes')
+          .insert({
           todo_id: todo.id,
           user_id: user.id,
           status,
-        });
+          })
+          .select('*, user_profiles(full_name)')
+          .single();
+
+        if (insertError) throw insertError;
+
+        onUpdate(todo.id, (current) => ({
+          ...current,
+          votes: [...current.votes, insertedVote],
+        }));
       }
-      onRefresh();
     } catch (error) {
       console.error('Error voting:', error);
       alert('Failed to update vote');
@@ -281,13 +312,23 @@ const TodoItem = ({ todo, onEdit, onRefresh }) => {
 
     setSubmittingComment(true);
     try {
-      await supabase.from('todo_comments').insert({
+      const { data: insertedComment, error: insertError } = await supabase
+        .from('todo_comments')
+        .insert({
         todo_id: todo.id,
         user_id: user.id,
         comment: newComment.trim(),
-      });
+        })
+        .select('*, user_profiles(full_name)')
+        .single();
+
+      if (insertError) throw insertError;
+
       setNewComment('');
-      onRefresh();
+      onUpdate(todo.id, (current) => ({
+        ...current,
+        comments: [...current.comments, insertedComment],
+      }));
     } catch (error) {
       console.error('Error adding comment:', error);
       alert('Failed to add comment');
@@ -300,7 +341,10 @@ const TodoItem = ({ todo, onEdit, onRefresh }) => {
     if (!confirm('Delete this comment?')) return;
     try {
       await supabase.from('todo_comments').delete().eq('id', commentId);
-      onRefresh();
+      onUpdate(todo.id, (current) => ({
+        ...current,
+        comments: current.comments.filter((c) => c.id !== commentId),
+      }));
     } catch (error) {
       console.error('Error deleting comment:', error);
     }
@@ -316,17 +360,31 @@ const TodoItem = ({ todo, onEdit, onRefresh }) => {
       if (existingReaction) {
         // Remove reaction
         await supabase.from('todo_reactions').delete().eq('id', existingReaction.id);
+        onUpdate(todo.id, (current) => ({
+          ...current,
+          reactions: current.reactions.filter((r) => r.id !== existingReaction.id),
+        }));
       } else {
         // Add reaction
-        await supabase.from('todo_reactions').insert({
+        const { data: insertedReaction, error: insertError } = await supabase
+          .from('todo_reactions')
+          .insert({
           todo_id: todo.id,
           user_id: user.id,
           emoji,
-        });
+          })
+          .select('*, user_profiles(full_name)')
+          .single();
+
+        if (insertError) throw insertError;
+
+        onUpdate(todo.id, (current) => ({
+          ...current,
+          reactions: [...current.reactions, insertedReaction],
+        }));
       }
       
       setShowReactionPicker(false);
-      onRefresh();
     } catch (error) {
       console.error('Error handling reaction:', error);
       alert('Failed to update reaction');
@@ -360,7 +418,10 @@ const TodoItem = ({ todo, onEdit, onRefresh }) => {
         .update({ completed: !todo.completed })
         .eq('id', todo.id);
       if (error) throw error;
-      onRefresh();
+      onUpdate(todo.id, (current) => ({
+        ...current,
+        completed: !current.completed,
+      }));
     } catch (error) {
       console.error('Error toggling todo:', error);
       alert('Failed to update task');
@@ -373,7 +434,7 @@ const TodoItem = ({ todo, onEdit, onRefresh }) => {
     try {
       const { error } = await supabase.from('todos').delete().eq('id', todo.id);
       if (error) throw error;
-      onRefresh();
+      onRemove(todo.id);
     } catch (error) {
       console.error('Error deleting todo:', error);
       alert('Failed to delete task');
