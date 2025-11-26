@@ -279,10 +279,10 @@ const NoteCard = ({ note, onEdit, onUpdate, onRemove }) => {
           ),
         }));
       } else {
-        // Add vote
+        // Add vote - use upsert to handle race conditions
         const { data: insertedVote, error } = await supabase
           .from('note_comment_votes')
-          .insert({ comment_id: commentId, user_id: user.id, value })
+          .upsert({ comment_id: commentId, user_id: user.id, value }, { onConflict: 'comment_id,user_id' })
           .select()
           .single();
         if (error) throw error;
@@ -314,10 +314,10 @@ const NoteCard = ({ note, onEdit, onUpdate, onRemove }) => {
           ),
         }));
       } else {
-        // Add reaction
+        // Add reaction - use upsert to handle race conditions
         const { data: insertedReaction, error } = await supabase
           .from('note_comment_reactions')
-          .insert({ comment_id: commentId, user_id: user.id, emoji })
+          .upsert({ comment_id: commentId, user_id: user.id, emoji }, { onConflict: 'comment_id,user_id,emoji' })
           .select()
           .single();
         if (error) throw error;

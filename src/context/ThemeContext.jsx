@@ -12,6 +12,7 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState('light');
+  const [manualOverride, setManualOverride] = useState(null);
 
   // Get IST time and determine if it should be dark mode
   const getISTTheme = () => {
@@ -29,8 +30,12 @@ export const ThemeProvider = ({ children }) => {
     return isDarkTime ? 'dark' : 'light';
   };
 
-  // Check and update theme based on IST time
+  // Check and update theme based on IST time or manual override
   const updateThemeByTime = () => {
+    if (manualOverride) {
+      return; // Don't update if user has manually overridden
+    }
+    
     const newTheme = getISTTheme();
     if (newTheme !== theme) {
       setTheme(newTheme);
@@ -38,11 +43,37 @@ export const ThemeProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    // Set initial theme
-    updateThemeByTime();
+  // Manual toggle function
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    setManualOverride(true);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme-override', newTheme);
+  };
 
-    // Check every minute for time changes
+  // Reset to automatic
+  const resetToAutomatic = () => {
+    setManualOverride(false);
+    localStorage.removeItem('theme-override');
+    const autoTheme = getISTTheme();
+    setTheme(autoTheme);
+    document.documentElement.setAttribute('data-theme', autoTheme);
+  };
+
+  useEffect(() => {
+    // Check for stored override
+    const stored = localStorage.getItem('theme-override');
+    if (stored) {
+      setTheme(stored);
+      setManualOverride(true);
+      document.documentElement.setAttribute('data-theme', stored);
+    } else {
+      // Set initial theme
+      updateThemeByTime();
+    }
+
+    // Check every minute for time changes (only if not overridden)
     const interval = setInterval(updateThemeByTime, 60000);
 
     return () => clearInterval(interval);
@@ -56,6 +87,9 @@ export const ThemeProvider = ({ children }) => {
   const value = {
     theme,
     isDark: theme === 'dark',
+    toggleTheme,
+    resetToAutomatic,
+    isManualOverride: manualOverride,
   };
 
   return (

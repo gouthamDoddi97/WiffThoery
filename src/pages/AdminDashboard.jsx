@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
+import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LogOut,
@@ -21,6 +22,8 @@ import {
   StickyNote,
   ListTodo,
   Calculator,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import ImageUpload from '../components/ImageUpload';
@@ -29,6 +32,7 @@ import formatINR from '../lib/formatCurrency';
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { profile, signOut } = useAuth();
+  const { theme, toggleTheme, isDark } = useTheme();
   const [expenses, setExpenses] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -161,6 +165,14 @@ const AdminDashboard = () => {
                 >
                   <Calculator size={18} />
                   <span className="button-text">Calculator</span>
+                </button>
+                <button
+                  onClick={toggleTheme}
+                  className="button button--secondary"
+                  title={isDark ? 'Light Mode' : 'Dark Mode'}
+                >
+                  {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                  <span className="button-text">{isDark ? 'Light' : 'Dark'}</span>
                 </button>
               </div>
               <div className="user-info">
