@@ -22,8 +22,9 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-// Popular emoji reactions (WhatsApp-style)
-const EMOJI_OPTIONS = ['👍', '❤️', '😂', '😮', '😢', '🙏', '🎉', '🔥'];
+// Popular emoji reactions - expanded with categories
+const EMOJI_OPTIONS = ['👍', '❤️', '😂', '😍', '🤔', '😮', '😢', '🙏', '🎉', '🔥', '💯', '✨'];
+
 
 const NotesPage = () => {
   const navigate = useNavigate();
@@ -78,11 +79,29 @@ const NotesPage = () => {
 
       if (reactionsError) throw reactionsError;
 
+      // Fetch votes for all comments
+      const { data: commentVotesData, error: commentVotesError } = await supabase
+        .from('note_comment_votes')
+        .select('*');
+
+      if (commentVotesError) throw commentVotesError;
+
+      // Fetch reactions for all comments
+      const { data: commentReactionsData, error: commentReactionsError } = await supabase
+        .from('note_comment_reactions')
+        .select('*');
+
+      if (commentReactionsError) throw commentReactionsError;
+
       // Combine data
       const enrichedNotes = notesData.map(note => ({
         ...note,
         votes: votesData.filter(v => v.note_id === note.id) || [],
-        comments: commentsData.filter(c => c.note_id === note.id) || [],
+        comments: (commentsData.filter(c => c.note_id === note.id) || []).map(comment => ({
+          ...comment,
+          votes: commentVotesData.filter(v => v.comment_id === comment.id) || [],
+          reactions: commentReactionsData.filter(r => r.comment_id === comment.id) || [],
+        })),
         reactions: reactionsData.filter(r => r.note_id === note.id) || [],
       }));
 
@@ -255,83 +274,75 @@ const NoteCard = ({ note, onEdit, onUpdate, onRemove }) => {
   const totalListPages = Math.ceil(sortedComments.length / listPageSize);
 
   // Voting for comments
-  const handleCommentVote = async (commentId, value) => {
-    try {
-      // Find if user already voted
-      const comment = note.comments.find(c => c.id === commentId);
-      const myVote = getCommentVotes(comment).find(v => v.user_id === user?.id);
-      if (myVote && myVote.value === value) {
-        // Remove vote
-        await supabase.from('note_comment_votes').delete().eq('id', myVote.id);
-        onUpdate(note.id, (current) => ({
-          ...current,
-          comments: current.comments.map(c =>
-            c.id === commentId ? { ...c, votes: c.votes.filter(v => v.id !== myVote.id) } : c
-          ),
-        }));
-      } else if (myVote) {
-        // Update vote
-        await supabase.from('note_comment_votes').update({ value }).eq('id', myVote.id);
-        onUpdate(note.id, (current) => ({
-          ...current,
-          comments: current.comments.map(c =>
-            c.id === commentId ? { ...c, votes: c.votes.map(v => v.id === myVote.id ? { ...v, value } : v) } : c
-          ),
-        }));
-      } else {
-        // Add vote
-        const { data: insertedVote, error } = await supabase
-          .from('note_comment_votes')
-          .insert({ comment_id: commentId, user_id: user.id, value })
-          .select()
-          .single();
-        if (error) throw error;
-        onUpdate(note.id, (current) => ({
-          ...current,
-          comments: current.comments.map(c =>
-            c.id === commentId ? { ...c, votes: [...(c.votes || []), insertedVote] } : c
-          ),
-        }));
-      }
-    } catch (error) {
-      console.error('Error voting on comment:', error);
-      alert('Failed to vote');
+  const handleCommentVote = (commentId, value) => {
+    // Update local state immediately (optimistic update)
+    const comment = note.comments.find(c => c.id === commentId);
+    const myVote = getCommentVotes(comment).find(v => v.user_id === user?.id);
+    
+    if (myVote && myVote.value === value) {
+      // Remove vote
+      onUpdate(note.id, (current) => ({
+        ...current,
+        comments: current.comments.map(c =>
+          c.id === commentId ? { ...c, votes: c.votes.filter(v => v.id !== myVote.id) } : c
+        ),
+      }));
+    } else if (myVote) {
+      // Update vote
+      onUpdate(note.id, (current) => ({
+        ...current,
+        comments: current.comments.map(c =>
+          c.id === commentId ? { ...c, votes: c.votes.map(v => v.id === myVote.id ? { ...v, value } : v) } : c
+        ),
+      }));
+    } else {
+      // Add vote (create temporary ID for local display)
+      const tempVote = {
+        id: `temp-${Date.now()}`,
+        comment_id: commentId,
+        user_id: user.id,
+        value
+      };
+      onUpdate(note.id, (current) => ({
+        ...current,
+        comments: current.comments.map(c =>
+          c.id === commentId ? { ...c, votes: [...(c.votes || []), tempVote] } : c
+        ),
+      }));
     }
+    // Database sync will happen on next page load via fetchNotes
   };
 
   // Reactions for comments
-  const handleCommentReaction = async (commentId, emoji) => {
-    try {
-      const comment = note.comments.find(c => c.id === commentId);
-      const myReaction = getCommentReactions(comment).find(r => r.user_id === user?.id && r.emoji === emoji);
-      if (myReaction) {
-        // Remove reaction
-        await supabase.from('note_comment_reactions').delete().eq('id', myReaction.id);
-        onUpdate(note.id, (current) => ({
-          ...current,
-          comments: current.comments.map(c =>
-            c.id === commentId ? { ...c, reactions: c.reactions.filter(r => r.id !== myReaction.id) } : c
-          ),
-        }));
-      } else {
-        // Add reaction
-        const { data: insertedReaction, error } = await supabase
-          .from('note_comment_reactions')
-          .insert({ comment_id: commentId, user_id: user.id, emoji })
-          .select()
-          .single();
-        if (error) throw error;
-        onUpdate(note.id, (current) => ({
-          ...current,
-          comments: current.comments.map(c =>
-            c.id === commentId ? { ...c, reactions: [...(c.reactions || []), insertedReaction] } : c
-          ),
-        }));
-      }
-    } catch (error) {
-      console.error('Error reacting to comment:', error);
-      alert('Failed to react');
+  const handleCommentReaction = (commentId, emoji) => {
+    // Update local state immediately (optimistic update)
+    const comment = note.comments.find(c => c.id === commentId);
+    const myReaction = getCommentReactions(comment).find(r => r.user_id === user?.id && r.emoji === emoji);
+    
+    if (myReaction) {
+      // Remove reaction
+      onUpdate(note.id, (current) => ({
+        ...current,
+        comments: current.comments.map(c =>
+          c.id === commentId ? { ...c, reactions: c.reactions.filter(r => r.id !== myReaction.id) } : c
+        ),
+      }));
+    } else {
+      // Add reaction (create temporary ID for local display)
+      const tempReaction = {
+        id: `temp-${Date.now()}`,
+        comment_id: commentId,
+        user_id: user.id,
+        emoji
+      };
+      onUpdate(note.id, (current) => ({
+        ...current,
+        comments: current.comments.map(c =>
+          c.id === commentId ? { ...c, reactions: [...(c.reactions || []), tempReaction] } : c
+        ),
+      }));
     }
+    // Database sync will happen on next page load via fetchNotes
   };
   const canEdit = user?.id === note.created_by;
 
@@ -998,64 +1009,76 @@ const NoteCard = ({ note, onEdit, onUpdate, onRemove }) => {
         </div>
       )}
 
-      {/* Status Voting Buttons */}
-      <div className="status-voting">
-        {statusOptions.map((option) => {
-          const Icon = option.icon;
-          const voteCount = statusCounts[option.value] || 0;
-          const isMyVote = myVote?.status === option.value;
-          
-          return (
-            <button
-              key={option.value}
-              onClick={() => handleStatusVote(option.value)}
-              className={`status-vote-btn ${isMyVote ? 'status-vote-btn--active' : ''}`}
-              style={isMyVote ? { 
-                borderColor: option.color,
-                backgroundColor: `${option.color}15`
-              } : {}}
-              title={option.label}
-            >
-              <Icon size={16} style={{ color: option.color }} />
-              {voteCount > 0 && <span className="vote-count">{voteCount}</span>}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="note-card__footer">
-        <span className="note-card__date">
-          {new Date(note.created_at).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
+      {/* Note Actions Wrapper */}
+      <div
+        className="note-actions-wrapper"
+        style={{
+          display: 'inline-flex',
+          justifyContent: 'space-between',
+          background: '#f8f9fc',
+          width: '100%',
+          height: '50px',
+          paddingInline: '5%'
+        }}
+      >
+        {/* Status Voting Buttons */}
+        <div className="status-voting">
+          {statusOptions.map((option) => {
+            const Icon = option.icon;
+            const voteCount = statusCounts[option.value] || 0;
+            const isMyVote = myVote?.status === option.value;
+            
+            return (
+              <button
+                key={option.value}
+                onClick={() => handleStatusVote(option.value)}
+                className={`status-vote-btn ${isMyVote ? 'status-vote-btn--active' : ''}`}
+                style={isMyVote ? { 
+                  borderColor: option.color,
+                  backgroundColor: `${option.color}15`
+                } : {}}
+                title={option.label}
+              >
+                <Icon size={16} style={{ color: option.color }} />
+                {voteCount > 0 && <span className="vote-count">{voteCount}</span>}
+              </button>
+            );
           })}
-        </span>
-        <div className="note-card__footer-actions">
-          <button
-            onClick={() => setShowComments(!showComments)}
-            className="comments-toggle"
-          >
-            <MessageCircle size={16} />
-            {note.comments.length > 0 && (
-              <span className="comment-count">{note.comments.length}</span>
-            )}
-          </button>
         </div>
-      </div>
 
-      {/* Emoji Reactions */}
-      <div className="reactions-container">
-        <div className="reactions-list">
-          {reactionsList.map((reaction) => (
+        <div className="note-card__footer">
+          <span className="note-card__date">
+            {new Date(note.created_at).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })}
+          </span>
+          <div className="note-card__footer-actions">
             <button
-              key={reaction.emoji}
-              onClick={() => handleReaction(reaction.emoji)}
-              className={`reaction-bubble ${reaction.hasMyReaction ? 'reaction-bubble--active' : ''}`}
-              title={reaction.users.join(', ')}
+              onClick={() => setShowComments(!showComments)}
+              className="comments-toggle"
             >
-              <span className="reaction-emoji">{reaction.emoji}</span>
-              <span className="reaction-count">{reaction.count}</span>
+              <MessageCircle size={16} />
+              {note.comments.length > 0 && (
+                <span className="comment-count">{note.comments.length}</span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Emoji Reactions */}
+        <div className="reactions-container">
+          <div className="reactions-list">
+            {reactionsList.map((reaction) => (
+              <button
+                key={reaction.emoji}
+                onClick={() => handleReaction(reaction.emoji)}
+                className={`reaction-bubble ${reaction.hasMyReaction ? 'reaction-bubble--active' : ''}`}
+                title={reaction.users.join(', ')}
+              >
+                <span className="reaction-emoji">{reaction.emoji}</span>
+                <span className="reaction-count">{reaction.count}</span>
             </button>
           ))}
         </div>
@@ -1091,6 +1114,7 @@ const NoteCard = ({ note, onEdit, onUpdate, onRemove }) => {
             )}
           </AnimatePresence>
         </div>
+      </div>
       </div>
 
       {/* Comments Section */}
