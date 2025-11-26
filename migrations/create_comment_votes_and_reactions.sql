@@ -1,22 +1,33 @@
--- Drop existing tables and policies if they exist
-DROP TABLE IF EXISTS note_comment_reactions CASCADE;
-DROP TABLE IF EXISTS note_comment_votes CASCADE;
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Anyone can view comment votes" ON note_comment_votes;
+DROP POLICY IF EXISTS "Users can create comment votes" ON note_comment_votes;
+DROP POLICY IF EXISTS "Users can update their own votes" ON note_comment_votes;
+DROP POLICY IF EXISTS "Users can delete their own votes" ON note_comment_votes;
+DROP POLICY IF EXISTS "Anyone can view comment reactions" ON note_comment_reactions;
+DROP POLICY IF EXISTS "Users can create comment reactions" ON note_comment_reactions;
+DROP POLICY IF EXISTS "Users can delete their own reactions" ON note_comment_reactions;
 
--- Create note_comment_votes table (simpler version without user_profiles FK)
-CREATE TABLE note_comment_votes (
+-- Drop existing indexes if they exist
+DROP INDEX IF EXISTS idx_comment_votes_comment_id;
+DROP INDEX IF EXISTS idx_comment_votes_user_id;
+DROP INDEX IF EXISTS idx_comment_reactions_comment_id;
+DROP INDEX IF EXISTS idx_comment_reactions_user_id;
+
+-- Create note_comment_votes table
+CREATE TABLE IF NOT EXISTS note_comment_votes (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   comment_id UUID NOT NULL REFERENCES note_comments(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL,
+  user_id UUID NOT NULL REFERENCES public.user_profiles(user_id) ON DELETE CASCADE,
   value INTEGER NOT NULL CHECK (value IN (-1, 1)),
   created_at TIMESTAMP DEFAULT now(),
   UNIQUE(comment_id, user_id)
 );
 
--- Create note_comment_reactions table (simpler version without user_profiles FK)
-CREATE TABLE note_comment_reactions (
+-- Create note_comment_reactions table
+CREATE TABLE IF NOT EXISTS note_comment_reactions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   comment_id UUID NOT NULL REFERENCES note_comments(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL,
+  user_id UUID NOT NULL REFERENCES public.user_profiles(user_id) ON DELETE CASCADE,
   emoji VARCHAR(10) NOT NULL,
   created_at TIMESTAMP DEFAULT now(),
   UNIQUE(comment_id, user_id, emoji)
