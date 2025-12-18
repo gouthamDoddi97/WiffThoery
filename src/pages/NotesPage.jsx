@@ -78,11 +78,29 @@ const NotesPage = () => {
 
       if (reactionsError) throw reactionsError;
 
+      // Fetch comment votes
+      const { data: commentVotesData, error: commentVotesError } = await supabase
+        .from('note_comment_votes')
+        .select('*');
+
+      if (commentVotesError) throw commentVotesError;
+
+      // Fetch comment reactions
+      const { data: commentReactionsData, error: commentReactionsError } = await supabase
+        .from('note_comment_reactions')
+        .select('*');
+
+      if (commentReactionsError) throw commentReactionsError;
+
       // Combine data
       const enrichedNotes = notesData.map(note => ({
         ...note,
         votes: votesData.filter(v => v.note_id === note.id) || [],
-        comments: commentsData.filter(c => c.note_id === note.id) || [],
+        comments: commentsData.filter(c => c.note_id === note.id).map(comment => ({
+          ...comment,
+          votes: commentVotesData.filter(v => v.comment_id === comment.id) || [],
+          reactions: commentReactionsData.filter(r => r.comment_id === comment.id) || [],
+        })) || [],
         reactions: reactionsData.filter(r => r.note_id === note.id) || [],
       }));
 
@@ -260,42 +278,58 @@ const NoteCard = ({ note, onEdit, onUpdate, onRemove }) => {
       // Find if user already voted
       const comment = note.comments.find(c => c.id === commentId);
       const myVote = getCommentVotes(comment).find(v => v.user_id === user?.id);
+      
       if (myVote && myVote.value === value) {
-        // Remove vote
-        await supabase.from('note_comment_votes').delete().eq('id', myVote.id);
+        // Remove vote - optimistic update first
         onUpdate(note.id, (current) => ({
           ...current,
           comments: current.comments.map(c =>
             c.id === commentId ? { ...c, votes: c.votes.filter(v => v.id !== myVote.id) } : c
           ),
         }));
+        // Then sync to database
+        await supabase.from('note_comment_votes').delete().eq('id', myVote.id);
       } else if (myVote) {
-        // Update vote
-        await supabase.from('note_comment_votes').update({ value }).eq('id', myVote.id);
+        // Update vote - optimistic update first
         onUpdate(note.id, (current) => ({
           ...current,
           comments: current.comments.map(c =>
             c.id === commentId ? { ...c, votes: c.votes.map(v => v.id === myVote.id ? { ...v, value } : v) } : c
           ),
         }));
+        // Then sync to database using upsert
+        await supabase.from('note_comment_votes').upsert(
+          { id: myVote.id, comment_id: commentId, user_id: user.id, value },
+          { onConflict: 'id' }
+        );
       } else {
-        // Add vote - use upsert to handle race conditions
+        // Add vote - create temporary ID for optimistic update
+        const tempId = `temp-${Date.now()}`;
+        onUpdate(note.id, (current) => ({
+          ...current,
+          comments: current.comments.map(c =>
+            c.id === commentId ? { ...c, votes: [...(c.votes || []), { id: tempId, comment_id: commentId, user_id: user.id, value }] } : c
+          ),
+        }));
+        // Then sync to database using upsert
         const { data: insertedVote, error } = await supabase
           .from('note_comment_votes')
           .upsert({ comment_id: commentId, user_id: user.id, value }, { onConflict: 'comment_id,user_id' })
           .select()
           .single();
         if (error) throw error;
-        onUpdate(note.id, (current) => ({
-          ...current,
-          comments: current.comments.map(c =>
-            c.id === commentId ? { ...c, votes: [...(c.votes || []), insertedVote] } : c
-          ),
-        }));
+        // Update with real ID from database
+        if (insertedVote) {
+          onUpdate(note.id, (current) => ({
+            ...current,
+            comments: current.comments.map(c =>
+              c.id === commentId ? { ...c, votes: c.votes.map(v => v.id === tempId ? insertedVote : v) } : c
+            ),
+          }));
+        }
       }
     } catch (error) {
       console.error('Error voting on comment:', error);
-      alert('Failed to vote');
     }
   };
 
@@ -305,32 +339,43 @@ const NoteCard = ({ note, onEdit, onUpdate, onRemove }) => {
       const comment = note.comments.find(c => c.id === commentId);
       const myReaction = getCommentReactions(comment).find(r => r.user_id === user?.id && r.emoji === emoji);
       if (myReaction) {
-        // Remove reaction
-        await supabase.from('note_comment_reactions').delete().eq('id', myReaction.id);
+        // Remove reaction - optimistic update first
         onUpdate(note.id, (current) => ({
           ...current,
           comments: current.comments.map(c =>
             c.id === commentId ? { ...c, reactions: c.reactions.filter(r => r.id !== myReaction.id) } : c
           ),
         }));
+        // Then sync to database
+        await supabase.from('note_comment_reactions').delete().eq('id', myReaction.id);
       } else {
-        // Add reaction - use upsert to handle race conditions
+        // Add reaction - create temporary ID for optimistic update
+        const tempId = `temp-${Date.now()}`;
+        onUpdate(note.id, (current) => ({
+          ...current,
+          comments: current.comments.map(c =>
+            c.id === commentId ? { ...c, reactions: [...(c.reactions || []), { id: tempId, comment_id: commentId, user_id: user.id, emoji }] } : c
+          ),
+        }));
+        // Then sync to database using upsert
         const { data: insertedReaction, error } = await supabase
           .from('note_comment_reactions')
           .upsert({ comment_id: commentId, user_id: user.id, emoji }, { onConflict: 'comment_id,user_id,emoji' })
           .select()
           .single();
         if (error) throw error;
-        onUpdate(note.id, (current) => ({
-          ...current,
-          comments: current.comments.map(c =>
-            c.id === commentId ? { ...c, reactions: [...(c.reactions || []), insertedReaction] } : c
-          ),
-        }));
+        // Update with real ID from database
+        if (insertedReaction) {
+          onUpdate(note.id, (current) => ({
+            ...current,
+            comments: current.comments.map(c =>
+              c.id === commentId ? { ...c, reactions: c.reactions.map(r => r.id === tempId ? insertedReaction : r) } : c
+            ),
+          }));
+        }
       }
     } catch (error) {
       console.error('Error reacting to comment:', error);
-      alert('Failed to react');
     }
   };
   const canEdit = user?.id === note.created_by;

@@ -5,8 +5,11 @@ import './CartDrawer.css';
 
 const CartDrawer = ({ isOpen, onClose, cart, onRemoveItem }) => {
     const total = cart.reduce((sum, item) => {
-        const price = parseFloat(item.price.replace('$', ''));
-        return sum + price;
+        // Handle both string and number prices
+        const price = typeof item.price === 'string' 
+            ? parseFloat(item.price.replace('$', '').replace(/,/g, ''))
+            : parseFloat(item.price);
+        return sum + (isNaN(price) ? 0 : price);
     }, 0);
 
     return (
